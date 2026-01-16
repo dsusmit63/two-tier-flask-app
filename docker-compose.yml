@@ -22,7 +22,7 @@ services:
       retries: 5
       start_period: 60s
 
-  flask-app:
+  two-tier-flask-app:
     image: two-tier-flask-app:latest
     container_name: flask-app
     ports:

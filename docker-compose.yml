@@ -23,7 +23,7 @@ services:
       start_period: 60s
 
   two-tier-flask-app:
-    image: two-tier-flask-app:latest
+    image: dsusmit63/two-tier-flask-app:latest
     container_name: two-tier-flask-app
     ports:
       - "5000:5000"

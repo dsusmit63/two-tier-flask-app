@@ -1,0 +1,14 @@
+---
+name: Dependency Scan
+on:
+  workflow_call:
+jobs:
+  dependency-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+      - name: Run Dependency Scan
+        uses: pypa/gh-action-pip-audit@v1.1.0
+        with:
+          inputs: requirements.txt

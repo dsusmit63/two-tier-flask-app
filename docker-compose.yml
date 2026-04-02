@@ -1,0 +1,47 @@
+---
+version: "3.9"
+services:
+  db:
+    image: mysql:5.7
+    container_name: flaskappdb
+    restart: unless-stopped
+    env_file:
+      - .env
+    healthcheck:
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - -h
+        - localhost
+        - -u
+        - root
+        - -p$MYSQL_ROOT_PASSWORD
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - flask-app-data:/var/lib/mysql
+    networks:
+      - flask-app-nw
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.Multistage
+    container_name: flaskapp
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - flask-app-nw
+volumes:
+  flask-app-data:
+networks:
+  flask-app-nw:
+    driver: bridge

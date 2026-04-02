@@ -1,0 +1,58 @@
+# Base image - build stage
+FROM python:3.11-slim AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-dev \
+    default-libmysqlclient-dev \
+    build-essential \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements.txt
+COPY requirements.txt .
+
+# Upgrade pip & install dependencies
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt --target /app/deps
+
+# Runtime stage
+FROM python:3.11-slim 
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    default-libmysqlclient-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN useradd -m appuser
+
+# Copy dependencies from builder
+COPY --from=builder /app/deps /app/deps
+
+# Copy code
+COPY . .
+
+# Remove requirements.txt
+RUN rm requirements.txt
+
+# Change ownership to non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
+EXPOSE 5000
+
+# Set environment
+ENV PYTHONPATH=/app/deps
+
+# Run & serve application
+CMD ["python","app.py"]

@@ -1,0 +1,14 @@
+---
+name: Dockerfile Scan
+on:
+  workflow_call:
+jobs:
+  dockerfile-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+      - name: Scan Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile.Multistage

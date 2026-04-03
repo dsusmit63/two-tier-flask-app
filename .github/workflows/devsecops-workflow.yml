@@ -1,0 +1,22 @@
+---
+name: DevSecOps Workflow
+on:
+  workflow_dispatch:
+jobs:
+  deployment:
+    - name: Code Quality
+      uses: ./code-quality.yml
+    - name: Secret Scan
+      uses: ./secret-scan.yml
+    - name: SAST
+      uses: ./SAST.yml
+    - name: Dependency Scan
+      uses: ./dependency-scan.yml
+    - name: Dockerfile Scan
+      uses: ./dockerfile-scan.yml
+    - name: Build and Push
+      uses: ./build-and-push.yml
+    - name: Image Scan
+      uses: ./image-scan.yml
+    - name: Deploy
+      uses: ./deploy.yml

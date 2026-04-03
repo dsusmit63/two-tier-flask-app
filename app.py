@@ -13,19 +13,22 @@ app.config["MYSQL_DB"] = os.environ.get("MYSQL_DB", "default_db")
 # Initialize MySQL
 mysql = MySQL(app)
 
+
 def init_db():
     with app.app_context():
         cur = mysql.connection.cursor()
         cur.execute(
-                """
+            """
         CREATE TABLE IF NOT EXISTS messages (
             id INT AUTO_INCREMENT PRIMARY KEY,
             message TEXT
         );
         """
         )
+
         mysql.connection.commit()  
         cur.close()
+
 
 @app.route("/")
 def hello():
@@ -35,6 +38,7 @@ def hello():
     cur.close()
     return render_template("index.html", messages=messages)
 
+
 @app.route("/submit", methods=["POST"])
 def submit():
     new_message = request.form.get("new_message")
@@ -43,6 +47,7 @@ def submit():
     mysql.connection.commit()
     cur.close()
     return jsonify({"message": new_message})
+
 
 if __name__ == "__main__":
     init_db()

@@ -1,0 +1,19 @@
+---
+name: Image Scanning
+on:
+  workflow_call:
+jobs:
+  image-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Dockerhub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Image Scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: 'dsusmit63/two-tier-flask-app:${{ github.sha }}'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'

@@ -4,18 +4,18 @@ on:
   workflow_dispatch:
 jobs:
   code-quality-check:
-    uses: ./code-quality.yml
+    uses: ./.github/workflows/code-quality.yml
   secret-scan:
-    uses: ./secret-scan.yml
+    uses: ./.github/workflows/secret-scan.yml
   SAST:
-    uses: ./SAST.yml
+    uses: ./.github/workflows/SAST.yml
   dependency-scan:
-    uses: ./dependency-scan.yml
+    uses: ./.github/workflows/dependency-scan.yml
   dockerfile-scan:
-    uses: ./dockerfile-scan.yml
+    uses: ./.github/workflows/dockerfile-scan.yml
   build-and-push:
-    uses: ./build-and-push.yml
+    uses: ./.github/workflows/build-and-push.yml
   image-scan:
-    uses: ./image-scan.yml
+    uses: ./.github/workflows/image-scan.yml
   deploy:
-    uses: ./deploy.yml
+    uses: ./.github/workflows/deploy.yml

@@ -6,12 +6,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      name: SSH to Remote Server
-      uses: appleboy/ssh-action@v1
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        user: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_PRIVATE_KEY }}
-        script: |
-          echo "starting deployment..."
-          mkdir -p flask-app
+      - name: SSH to Remote Server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          user: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            echo "starting deployment..."
+            mkdir -p flask-app

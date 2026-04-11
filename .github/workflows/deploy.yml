@@ -9,6 +9,8 @@ on:
         required: true
       ec2_user:
         required: true
+      ec2_port:
+        required: true
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,6 +21,7 @@ jobs:
           host: ${{ secrets.ec2_host }}
           user: ${{ secrets.ec2_user }}
           key: ${{ secrets.ec2_private_key }}
+          port: ${{ secrets.ec2_port }}
           script: |
             echo "starting deployment..."
             mkdir -p flask-app

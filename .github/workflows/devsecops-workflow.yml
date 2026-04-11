@@ -6,19 +6,15 @@ jobs:
   code-quality-check:
     uses: ./.github/workflows/code-quality.yml
   secret-scan:
-    needs: [code-quality-check]
     uses: ./.github/workflows/secret-scan.yml
   SAST:
-    needs: [secret-scan]
     uses: ./.github/workflows/SAST.yml
   dependency-scan:
-    needs: [SAST]
     uses: ./.github/workflows/dependency-scan.yml
-  dockerfile-scan:
-    needs: [dependency-scan]
+  docker-scan:
     uses: ./.github/workflows/dockerfile-scan.yml
   build-and-push:
-    needs: [dockerfile-scan]
+    needs: [code-quality-check, secret-scan, SAST, dependency-scan, docker-scan]
     uses: ./.github/workflows/build-and-push.yml
     with:
       dockerhub_user: ${{ vars.DOCKERHUB_USER }}

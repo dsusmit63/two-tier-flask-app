@@ -15,10 +15,10 @@ jobs:
     uses: ./.github/workflows/dockerfile-scan.yml
   build-and-push:
     uses: ./.github/workflows/build-and-push.yml
-    vars:
-      DOCKERHUB_USER: ${{ vars.DOCKERHUB_USER }}
+    with:
+      dockerhub_user: ${{ vars.DOCKERHUB_USER }}
     secrets:
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
   image-scan:
     uses: ./.github/workflows/image-scan.yml
   deploy:

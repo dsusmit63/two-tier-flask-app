@@ -30,8 +30,17 @@ jobs:
   deploy:
     needs: [image-scan]
     uses: ./.github/workflows/deploy.yml
+    with:
+      dockerhub_user: ${{ vars.DOCKERHUB_USER }}
+      ec2_user: ${{ vars.EC2_USER }}
+      ec2_port: ${{ vars.EC2_PORT }}
+      mysql_database: ${{ vars.MYSQL_DATABASE }}
+      mysql_db: ${{ vars.MYSQL_DB }}
+      mysql_host: ${{ vars.MYSQL_HOST }}
     secrets:
       ec2_host: ${{ secrets.EC2_HOST }}
       ec2_private_key: ${{ secrets.EC2_PRIVATE_KEY }}
-      ec2_user: ${{ secrets.EC2_USER }}
-      ec2_port: ${{ secrets.EC2_PORT }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+      mysql_password: ${{ secrets.MYSQL_PASSWORD }}
+      mysql_root_password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      mysql_user: ${{ secrets.MYSQL_USER }}

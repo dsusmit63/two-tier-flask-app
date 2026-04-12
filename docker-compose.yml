@@ -26,9 +26,7 @@ services:
     networks:
       - flask-app-nw
   flask-app:
-    build:
-      context: .
-      dockerfile: Dockerfile.Multistage
+    image: docker.io/dsusmit63/two-tier-flask-app:${IMAGE_TAG}
     container_name: flaskapp
     restart: unless-stopped
     ports:

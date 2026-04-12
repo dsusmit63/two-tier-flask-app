@@ -1,51 +1,85 @@
 import os
+import time
 
+import mysql.connector
 from flask import Flask, jsonify, render_template, request
-from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 
-# Configure MySQL from environment variables
-app.config["MYSQL_HOST"] = os.environ.get("MYSQL_HOST", "localhost")
-app.config["MYSQL_USER"] = os.environ.get("MYSQL_USER", "default_user")
-app.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD", "default_password")
-app.config["MYSQL_DB"] = os.environ.get("MYSQL_DB", "default_db")
+# Database configuration
+DB_CONFIG = {
+    "host": os.environ.get("MYSQL_HOST", "db"),  # IMPORTANT: docker service name
+    "user": os.environ.get("MYSQL_USER", "root"),
+    "password": os.environ.get("MYSQL_PASSWORD", "password"),
+    "database": os.environ.get("MYSQL_DB", "testdb"),
+}
 
-# Initialize MySQL
-mysql = MySQL(app)
+
+# Retry DB connection (handles container startup timing issues)
+def get_db_connection():
+    retries = 5
+    while retries > 0:
+        try:
+            conn = mysql.connector.connect(**DB_CONFIG)
+            print("✅ Connected to MySQL")
+            return conn
+        except mysql.connector.Error as err:
+            print(f"❌ DB connection failed: {err}")
+            retries -= 1
+            time.sleep(3)
+
+    raise Exception("Database connection failed after retries")
 
 
+# Initialize database
 def init_db():
-    with app.app_context():
-        cur = mysql.connection.cursor()
-        cur.execute(
-            """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS messages (
             id INT AUTO_INCREMENT PRIMARY KEY,
             message TEXT
-        );
-        """
         )
-        mysql.connection.commit()
-        cur.close()
+    """
+    )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 
 @app.route("/")
-def hello():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT message FROM messages")
-    messages = cur.fetchall()
-    cur.close()
+def home():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT message FROM messages")
+    messages = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
     return render_template("index.html", messages=messages)
 
 
 @app.route("/submit", methods=["POST"])
 def submit():
     new_message = request.form.get("new_message")
-    cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO messages (message) VALUES (%s)", [new_message])
-    mysql.connection.commit()
-    cur.close()
+
+    if not new_message:
+        return jsonify({"error": "Message cannot be empty"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("INSERT INTO messages (message) VALUES (%s)", (new_message,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
     return jsonify({"message": new_message})
 
 

@@ -5,19 +5,21 @@ FROM python:3.11-slim AS builder
 WORKDIR /app
 
 # Install system dependencies
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3-dev=3.9.3 \
-    default-libmysqlclient-dev=1.1.1 \
-    build-essential=12.12 \
-    pkg-config=1.6.5 \
+    python3-dev \
+    default-libmysqlclient-dev \
+    build-essential \
+    pkg-config \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements.txt
 COPY requirements.txt .
 
 # Upgrade pip & install dependencies
-RUN pip install --no-cache-dir -upgrade pip==23.3.1 && \
-    pip install --no-cache-dir -requirement requirements.txt --target /app/deps
+RUN pip install --no-cache-dir --upgrade pip==23.3.1 && \
+    pip install --no-cache-dir -r requirements.txt --target /app/deps
 
 # Runtime stage
 FROM python:3.11-slim 
@@ -26,8 +28,9 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install system dependencies
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    default-libmysqlclient-dev=1.1.1 \
+    default-libmysqlclient-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user

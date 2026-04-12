@@ -2,26 +2,88 @@
 name: Deployment
 on:
   workflow_call:
+    inputs:
+      dockerhub_user:
+        required: true
+        type: string
+      ec2_user:
+        required: true
+        type: string
+      ec2_port:
+        required: true
+        type: string
+      mysql_database:
+        required: true
+        type: string
+      mysql_db:
+        required: true
+        type: string
+      mysql_host:
+        required: true
+        type: string
     secrets:
       ec2_host:
         required: true
       ec2_private_key:
         required: true
-      ec2_user:
+      dockerhub_token:
         required: true
-      ec2_port:
+      mysql_password:
+        required: true
+      mysql_root_password:
+        required: true
+      mysql_user:
         required: true
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Copy Code
+        uses: actions/checkout@v6
       - name: SSH to Remote Server
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.ec2_host }}
-          username: ${{ secrets.ec2_user }}
+          username: ${{ inputs.ec2_user }}
           key: ${{ secrets.ec2_private_key }}
-          port: ${{ secrets.ec2_port }}
+          port: ${{ inputs.ec2_port }}
           script: |
             echo "starting deployment..."
-            mkdir -p flask-app
+            mkdir -p two-tier-flask-app
+      - name: Create .env file in server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.ec2_host }}
+          username: ${{ inputs.ec2_user }}
+          key: ${{ secrets.ec2_private_key }}
+          port: ${{ inputs.ec2_port }}
+          script: |
+            cd ~/two-tier-flask-app
+            echo "MYSQL_ROOT_PASSWORD=${{ secrets.mysql_root_password }}" > .env
+            echo "MYSQL_DATABASE=${{ inputs.mysql_database }}" >> .env
+            echo "MYSQL_DB=${{ inputs.mysql_db }}" >> .env
+            echo "MYSQL_USER=${{ secrets.mysql_user }}" >> .env
+            echo "MYSQL_PASSWORD=${{ secrets.mysql_password }}" >> .env
+            echo "MYSQL_HOST=${{ inputs.mysql_host }}" >> .env
+            echo "IMAGE_TAG=${{ github.sha }}" >> .env
+      - name: Copy files
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.ec2_host }}
+          username: ${{ inputs.ec2_user }}
+          key: ${{ secrets.ec2_private_key }}
+          port: ${{ inputs.ec2_port }}
+          source: docker-compose.yml
+          target: ~/two-tier-flask-app
+      - name: deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.ec2_host }}
+          username: ${{ inputs.ec2_user }}
+          key: ${{ secrets.ec2_private_key }}
+          port: ${{ inputs.ec2_port }}
+          script: |
+            echo "${{ secrets.dockerhub_token }}" | docker login -u "${{ inputs.dockerhub_user }}" --password-stdin
+            cd ~/two-tier-flask-app
+            docker compose pull
+            docker compose up -d

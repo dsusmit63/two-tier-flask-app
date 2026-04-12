@@ -23,6 +23,8 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@v7
         with:
+          context: .
+          file: ./Dockerfile.Multistage
           push: true
           tags: |
             dsusmit63/two-tier-flask-app:latest

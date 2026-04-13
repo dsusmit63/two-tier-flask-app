@@ -2,17 +2,21 @@
 name: SAST
 on:
   workflow_call:
+permissions:
+  contents: read
+  security-events: write
 jobs:
   sast:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: requirements.txt
       - name: Install Bandit
         run: |
          python -m pip install --upgrade pip

@@ -9,6 +9,9 @@ on:
     secrets:
       dockerhub_token:
         required: true
+permissions:
+  contents: read
+  security-events: write
 jobs:
   image-scan:
     runs-on: ubuntu-latest
@@ -21,6 +24,6 @@ jobs:
       - name: Image Scan
         uses: aquasecurity/trivy-action@0.35.0
         with:
-          image-ref: 'docker.io/dsusmit63/two-tier-flask-app:${{ github.sha }}'
+          image-ref: 'docker.io/${{ inputs.dockerhub_user }}/two-tier-flask-app:${{ github.sha }}'
           severity: 'CRITICAL'
           exit-code: '1'

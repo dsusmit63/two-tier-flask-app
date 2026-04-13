@@ -34,12 +34,14 @@ on:
         required: true
       mysql_user:
         required: true
+permissions:
+  contents: read
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Copy Code
-        uses: actions/checkout@v6
+      - name: Checkout Code
+        uses: actions/checkout@v4
       - name: SSH to Remote Server
         uses: appleboy/ssh-action@v1
         with:
@@ -49,15 +51,7 @@ jobs:
           port: ${{ inputs.ec2_port }}
           script: |
             echo "starting deployment..."
-            mkdir -p two-tier-flask-app
-      - name: Create .env file in server
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.ec2_host }}
-          username: ${{ inputs.ec2_user }}
-          key: ${{ secrets.ec2_private_key }}
-          port: ${{ inputs.ec2_port }}
-          script: |
+            mkdir -p ~/two-tier-flask-app
             cd ~/two-tier-flask-app
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.mysql_root_password }}" > .env
             echo "MYSQL_DATABASE=${{ inputs.mysql_database }}" >> .env
@@ -85,5 +79,6 @@ jobs:
           script: |
             echo "${{ secrets.dockerhub_token }}" | docker login -u "${{ inputs.dockerhub_user }}" --password-stdin
             cd ~/two-tier-flask-app
+            docker compose down || true
             docker compose pull
             docker compose up -d

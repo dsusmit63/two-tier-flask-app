@@ -31,5 +31,3 @@ jobs:
           tags: |
             ${{ inputs.dockerhub_user }}/two-tier-flask-app:latest
             ${{ inputs.dockerhub_user }}/two-tier-flask-app:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
